@@ -213,6 +213,10 @@
         A button instructs you not to press it until it turns green.
         After a random delay, the button turns green, and you should press it as quickly as possible.
         You need five valid attempts (≥100ms). Attempts under 100ms are considered accidental and not counted.
+        These extremely short times are very likely due to anticipating the change rather than reacting to it.
+        Learn more about reaction times and their lower bounds
+        <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses."
+            target="_blank">here</a>.
         After completing five valid attempts, you'll get your average reaction time.
     </p>
     <p class="project-description">
@@ -250,7 +254,6 @@
             let currentScoreboard = null;
             let startTime = 0;
             let timerId = null;
-            let hadSuspicious = false; // Track if there were suspicious attempts in this game
 
             function updateBestScoreDisplay() {
                 if (bestScore !== null) {
@@ -277,7 +280,6 @@
                 reactionTimes = [];
                 trialCount = 0;
                 validCount = 0;
-                hadSuspicious = false;
                 state = "idle";
                 button.className = "start";
                 button.textContent = "Start";
@@ -333,7 +335,7 @@
                 line.className = 'attempt-result';
                 if (accidental) {
                     line.classList.add('accidental-attempt');
-                    line.textContent = `Invalid: ${time.toFixed(2)} ms (see below)`;
+                    line.textContent = `Invalid: ${time.toFixed(2)} ms`;
                 } else {
                     line.textContent = `Attempt ${trialCount}: ${time.toFixed(2)} ms`;
                 }
@@ -347,19 +349,11 @@
                 currentScoreboard.appendChild(line);
             }
 
-            function appendFinalResults(avg, accidental) {
+            function appendFinalResults(avg) {
                 const finalScoreElem = document.createElement('div');
                 finalScoreElem.className = 'final-score';
                 finalScoreElem.textContent = `Average Score: ${avg.toFixed(2)} ms`;
                 currentScoreboard.appendChild(finalScoreElem);
-
-                // If suspicious attempts happened, add explanation
-                if (accidental) {
-                    const explanationElem = document.createElement('div');
-                    explanationElem.className = 'explanation';
-                    explanationElem.innerHTML = `Some attempts were below ${suspiciousThreshold} ms and are likely accidental and not counted. Learn more <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses." target="_blank">here</a>.`;
-                    currentScoreboard.appendChild(explanationElem);
-                }
             }
 
             function getScoreboardWidth() {
@@ -406,7 +400,7 @@
                     updateBestScoreDisplay();
                 }
 
-                appendFinalResults(avg, hadSuspicious);
+                appendFinalResults(avg);
                 prepareNextGame();
             }
 
@@ -438,7 +432,6 @@
                     // Check if this attempt is valid or suspicious
                     if (reactionTime < suspiciousThreshold) {
                         // Suspicious attempt
-                        hadSuspicious = true;
                         appendAttemptResult(reactionTime, true);
                         trialCount--;
                         // Not counted towards valid attempts
