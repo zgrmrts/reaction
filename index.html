@@ -133,6 +133,7 @@
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.4);
             padding: 10px;
+            cursor: pointer;
         }
 
         .light-mode .best-score-display {
@@ -168,6 +169,35 @@
             background-color: #fff;
             color: #000;
         }
+
+        #clearBestContainer {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .light-mode #clearBestContainer {
+            background: rgba(0, 0, 0, 0.1);
+            color: #000;
+        }
+
+        #clearBestScore {
+            font-size: 1em;
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: none;
+            background-color: #dc3545;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #clearBestScore:hover {
+            filter: brightness(1.1);
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -175,6 +205,9 @@
         <button id="themeToggle" class="theme-toggle">Light/Dark</button>
     </div>
     <div id="bestScoreDisplay" class="best-score-display" style="display:none;"></div>
+    <div id="clearBestContainer">
+        <button id="clearBestScore">Clear Best Score</button>
+    </div>
     <h1>Reaction Game</h1>
     <p class="project-description">
         This is a simple reaction game designed to measure human response times.
@@ -209,6 +242,8 @@
             const scoreboardContainer = document.getElementById('scoreboardContainer');
             const bestScoreDisplay = document.getElementById('bestScoreDisplay');
             const themeToggle = document.getElementById('themeToggle');
+            const clearBestContainer = document.getElementById('clearBestContainer');
+            const clearBestButton = document.getElementById('clearBestScore');
 
             let reactionTimes = [];
             let trialCount = 0;
@@ -226,9 +261,24 @@
                     bestScoreDisplay.textContent = `Best Score: ${bestScore.toFixed(2)} ms`;
                 } else {
                     bestScoreDisplay.style.display = "none";
+                    clearBestContainer.style.display = "none";
                 }
             }
             updateBestScoreDisplay();
+
+            bestScoreDisplay.addEventListener('click', function(){
+                // If there's a best score, toggle the clear button container
+                if (bestScore !== null) {
+                    clearBestContainer.style.display = clearBestContainer.style.display === "none" ? "block" : "none";
+                }
+            });
+
+            clearBestButton.addEventListener('click', function(){
+                // Clear best score
+                bestScore = null;
+                localStorage.removeItem('bestReactionScore');
+                updateBestScoreDisplay();
+            });
 
             function toggleTheme() {
                 if (document.body.classList.contains('dark-mode')) {
