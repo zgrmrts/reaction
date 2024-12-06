@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reaction Game</title>
+    <!-- Add favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
             --bg-color-dark: linear-gradient(to bottom right, #1b2735, #090a0f);
@@ -77,6 +79,11 @@
 
         button.ready {
             background-color: #28a745;
+        }
+
+        /* Add a class for the game-over state */
+        button.game-over-state {
+            background-color: red !important;
         }
 
         button:hover {
@@ -275,6 +282,7 @@
                 button.className = "start";
                 button.textContent = "Start";
                 button.disabled = false;
+                button.style.backgroundColor = ""; // Reset any inline style
             }
 
             function createNewScoreboard() {
@@ -403,12 +411,15 @@
             }
 
             function prepareNextGame() {
-                // After finishing a game, wait 1 second, then allow "Play Again"
+                // After finishing a game, first show "Game Over" in red for 2 seconds, then "Play Again" in green.
+                button.className = "game-over-state";
+                button.textContent = "Game Over";
+
                 setTimeout(() => {
                     button.disabled = false;
                     button.className = "start";
                     button.textContent = "Play Again";
-                }, 1000);
+                }, 2000);
             }
 
             button.addEventListener('click', () => {
