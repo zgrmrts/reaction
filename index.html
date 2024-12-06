@@ -94,7 +94,6 @@
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 8px;
-            /* Large min-height ensures space before GitHub link is filled first by scoreboard lines */
             min-height: 500px;
             box-sizing: border-box;
         }
@@ -119,6 +118,11 @@
         .final-score {
             margin-top: 20px;
             font-size: 1.2em;
+        }
+
+        .new-best {
+            color: #4caf50;
+            font-weight: bold;
         }
 
         .best-score-display {
@@ -273,10 +277,18 @@
                 scoreboardContainer.appendChild(line);
             }
 
-            function appendFinalResults(avg) {
+            function appendFinalResults(avg, newBest) {
                 const finalScoreElem = document.createElement('div');
                 finalScoreElem.className = 'final-score';
                 finalScoreElem.textContent = `Average Score: ${avg.toFixed(2)} ms`;
+
+                if (newBest) {
+                    const bestNotice = document.createElement('span');
+                    bestNotice.className = 'new-best';
+                    bestNotice.textContent = ' (New Best!)';
+                    finalScoreElem.appendChild(bestNotice);
+                }
+
                 scoreboardContainer.appendChild(finalScoreElem);
             }
 
@@ -313,13 +325,16 @@
                 const sum = reactionTimes.reduce((a, b) => a + b, 0);
                 const avg = sum / reactionTimes.length;
 
-                if (bestScore === null || avg < bestScore) {
+                // Check if this is a new best score
+                const isNewBest = (bestScore === null || avg < bestScore);
+
+                if (isNewBest) {
                     bestScore = avg;
                     localStorage.setItem('bestReactionScore', bestScore.toString());
                     updateBestScoreDisplay();
                 }
 
-                appendFinalResults(avg);
+                appendFinalResults(avg, isNewBest);
                 prepareNextGame();
             }
 
