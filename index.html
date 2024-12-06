@@ -365,7 +365,7 @@
                 button.textContent = "Don't press me";
                 button.disabled = false;
 
-                const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+                const randomDelay = Math.floor(Math.random() * 2000) + 500; // 0.5-2.5 seconds
                 timerId = setTimeout(() => {
                     state = "ready";
                     startTime = performance.now();
@@ -412,7 +412,7 @@
                     button.disabled = false;
                     button.className = "start";
                     button.textContent = "Play Again";
-                }, 2000);
+                }, 1000);
             }
 
             button.addEventListener('click', () => {
