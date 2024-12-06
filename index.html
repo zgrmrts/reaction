@@ -1,19 +1,459 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reaction Game</title>
+    <style>
+        :root {
+            --bg-color-dark: linear-gradient(to bottom right, #1b2735, #090a0f);
+            --bg-color-light: #f3f3f3;
+            --text-color-dark: #fff;
+            --text-color-light: #000;
+
+            /* Fixed width for each scoreboard */
+            --scoreboard-width: 320px;
+        }
+
+        body.dark-mode {
+            background: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+
+        body.light-mode {
+            background: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+
+        body.dark-mode a {
+            color: #add8e6;
+            /* Lighter link color in dark mode */
+        }
+
+        body.light-mode a {
+            color: #0000ee;
+            /* Default blue link in light mode */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+            transition: background 0.3s, color 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        p.project-description {
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            line-height: 1.5;
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: #fff;
+        }
+
+        button.start {
+            background-color: #28a745;
+        }
+
+        button.waiting {
+            background-color: #6c757d;
+        }
+
+        button.ready {
+            background-color: #28a745;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        #gameButton {
+            display: block;
+            margin: 0 auto 80px auto;
+            /* Space between button and scoreboard container */
+        }
+
+        .scoreboard-container-wrapper {
+            /* Enough width to show two scoreboards side-by-side */
+            width: calc(var(--scoreboard-width)*2 + 20px);
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scoreboard-container {
+            display: flex;
+            transition: transform 0.5s ease;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .scoreboard {
+            flex: 0 0 var(--scoreboard-width);
+            box-sizing: border-box;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .scoreboard:last-child {
+            margin-right: 0;
+        }
+
+        .light-mode .scoreboard {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .scoreboard h2 {
+            margin-top: 0;
+        }
+
+        .attempt-result {
+            margin: 5px 0;
+        }
+
+        .accidental-attempt {
+            color: #ffeb3b;
+        }
+
+        .final-score {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .explanation {
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .yellow-text {
+            color: #ffeb3b;
+        }
+
+        .best-score-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+        }
+
+        .light-mode .best-score-display {
+            background: rgba(0, 0, 0, 0.1);
+            color: #000;
+        }
+
+        .game-over {
+            color: #dc3545;
+        }
+
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 1em;
+            padding: 5px 10px;
+            border-radius: 8px;
+            margin-right: 10px;
+            border: none;
+        }
+
+        .light-mode .theme-toggle {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .dark-mode .theme-toggle {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
 </head>
 
-<body>
-    <h1>Reaction time game</h1>
-    <h3>Avarage of 5 rounds</h3>
-    <div id="bestDiv"></div>
-    <button id="theButton">Start</button>
-    <div id="gameOver"></div>
-    <div id="scoreDiv"></div>
-    <table id="results">
-    </table>
+<body class="dark-mode">
+    <div class="top-controls">
+        <button id="themeToggle" class="theme-toggle">Light/Dark</button>
+    </div>
+    <div id="bestScoreDisplay" class="best-score-display" style="display:none;"></div>
+    <h1>Reaction Game</h1>
+    <p class="project-description">
+        This is a simple reaction game designed to measure human response times.
+        When you begin a game, a new scoreboard appears below.
+        A button instructs you not to press it until it turns green.
+        After a random delay, the button turns green, and you should press it as quickly as possible.
+        You need five valid attempts (≥100ms). Attempts under 100ms are considered accidental and not counted.
+        After completing five valid attempts, you'll get your average reaction time.
+    </p>
+    <p class="project-description">
+        <!-- GitHub link starts here -->
+        <a href="https://github.com/zgrmrts/reaction" target="_blank">
+            <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub"
+                style="vertical-align: middle;">
+            View on GitHub
+        </a>
+        <!-- GitHub link ends here -->
+    </p>
+    <button id="gameButton" class="start">Start</button>
+
+    <div class="scoreboard-container-wrapper">
+        <div class="scoreboard-container" id="scoreboardContainer">
+            <!-- Scoreboards for each game will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const button = document.getElementById('gameButton');
+            const scoreboardContainerWrapper = document.querySelector('.scoreboard-container-wrapper');
+            const scoreboardContainer = document.getElementById('scoreboardContainer');
+            const bestScoreDisplay = document.getElementById('bestScoreDisplay');
+            const themeToggle = document.getElementById('themeToggle');
+
+            let reactionTimes = [];
+            let trialCount = 0; // Total attempts (including suspicious)
+            let validCount = 0; // Count only valid attempts (≥100ms)
+            let suspiciousThreshold = 100;
+            let totalValidAttempts = 5;
+            let state = "idle"; // 'idle', 'waiting', 'ready', 'done'
+            let bestScore = localStorage.getItem('bestReactionScore') ? parseFloat(localStorage.getItem('bestReactionScore')) : null;
+            let currentScoreboard = null;
+            let startTime = 0;
+            let timerId = null;
+            let hadSuspicious = false; // Track if there were suspicious attempts in this game
+
+            function updateBestScoreDisplay() {
+                if (bestScore !== null) {
+                    bestScoreDisplay.style.display = "block";
+                    bestScoreDisplay.textContent = `Best Score: ${bestScore.toFixed(2)} ms`;
+                } else {
+                    bestScoreDisplay.style.display = "none";
+                }
+            }
+            updateBestScoreDisplay();
+
+            function toggleTheme() {
+                if (document.body.classList.contains('dark-mode')) {
+                    document.body.classList.remove('dark-mode');
+                    document.body.classList.add('light-mode');
+                } else {
+                    document.body.classList.remove('light-mode');
+                    document.body.classList.add('dark-mode');
+                }
+            }
+            themeToggle.addEventListener('click', toggleTheme);
+
+            function resetForNewGame() {
+                reactionTimes = [];
+                trialCount = 0;
+                validCount = 0;
+                hadSuspicious = false;
+                state = "idle";
+                button.className = "start";
+                button.textContent = "Start";
+                button.disabled = false;
+            }
+
+            function createNewScoreboard() {
+                const scoreboard = document.createElement('div');
+                scoreboard.className = 'scoreboard';
+                const title = document.createElement('h2');
+                title.textContent = 'Results';
+                scoreboard.appendChild(title);
+                return scoreboard;
+            }
+
+            function prepareScoreboardsForNewGame() {
+                const existing = scoreboardContainer.querySelectorAll('.scoreboard');
+                if (existing.length >= 2) {
+                    // Three or more: append new scoreboard, shift and remove old
+                    const newBoard = createNewScoreboard();
+                    scoreboardContainer.appendChild(newBoard);
+                    currentScoreboard = newBoard;
+
+                    scoreboardContainer.style.transform = 'translateX(-' + getScoreboardWidth() + 'px)';
+
+                    scoreboardContainer.addEventListener('transitionend', function onTransEnd() {
+                        scoreboardContainer.removeEventListener('transitionend', onTransEnd);
+                        const allScoreboards = scoreboardContainer.querySelectorAll('.scoreboard');
+                        if (allScoreboards.length > 2) {
+                            allScoreboards[0].remove();
+                        }
+                        scoreboardContainer.style.transition = 'none';
+                        scoreboardContainer.style.transform = 'translateX(0)';
+                        scoreboardContainer.offsetHeight;
+                        scoreboardContainer.style.transition = 'transform 0.5s ease';
+                    }, { once: true });
+                } else {
+                    // Less than 2 scoreboards
+                    const newBoard = createNewScoreboard();
+                    scoreboardContainer.appendChild(newBoard);
+                    currentScoreboard = newBoard;
+                }
+            }
+
+            function startGame() {
+                prepareScoreboardsForNewGame();
+                startRound();
+            }
+
+            function appendAttemptResult(time, accidental) {
+                const line = document.createElement('div');
+                line.className = 'attempt-result';
+                if (accidental) {
+                    line.classList.add('accidental-attempt');
+                    line.textContent = `Invalid: ${time.toFixed(2)} ms (see below)`;
+                } else {
+                    line.textContent = `Attempt ${trialCount}: ${time.toFixed(2)} ms`;
+                }
+                currentScoreboard.appendChild(line);
+            }
+
+            function appendGameOverEarly() {
+                const line = document.createElement('div');
+                line.className = 'attempt-result game-over';
+                line.textContent = 'Pressed too early! Game Over.';
+                currentScoreboard.appendChild(line);
+            }
+
+            function appendFinalResults(avg, accidental) {
+                const finalScoreElem = document.createElement('div');
+                finalScoreElem.className = 'final-score';
+                finalScoreElem.textContent = `Average Score: ${avg.toFixed(2)} ms`;
+                currentScoreboard.appendChild(finalScoreElem);
+
+                // If suspicious attempts happened, add explanation
+                if (accidental) {
+                    const explanationElem = document.createElement('div');
+                    explanationElem.className = 'explanation';
+                    explanationElem.innerHTML = `Some attempts were below ${suspiciousThreshold} ms and are likely accidental and not counted. Learn more <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses." target="_blank">here</a>.`;
+                    currentScoreboard.appendChild(explanationElem);
+                }
+            }
+
+            function getScoreboardWidth() {
+                return 320; // Matches var(--scoreboard-width)
+            }
+
+            function startRound() {
+                state = "waiting";
+                button.className = "waiting";
+                button.textContent = "Don't press me";
+                button.disabled = false;
+
+                const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+                timerId = setTimeout(() => {
+                    state = "ready";
+                    startTime = performance.now();
+                    button.className = "ready";
+                    button.textContent = "Press me";
+                }, randomDelay);
+            }
+
+            function endGameEarly() {
+                clearTimeout(timerId);
+                state = "done";
+                button.className = "start";
+                button.textContent = "Game Over!";
+                button.disabled = true;
+
+                appendGameOverEarly();
+                prepareNextGame();
+            }
+
+            function finishGame() {
+                state = "done";
+                button.disabled = true;
+
+                let avg;
+                const sum = reactionTimes.reduce((a, b) => a + b, 0);
+                avg = sum / reactionTimes.length;
+
+                if (bestScore === null || avg < bestScore) {
+                    bestScore = avg;
+                    localStorage.setItem('bestReactionScore', bestScore.toString());
+                    updateBestScoreDisplay();
+                }
+
+                appendFinalResults(avg, hadSuspicious);
+                prepareNextGame();
+            }
+
+            function prepareNextGame() {
+                // After finishing a game, wait 1 second, then allow "Play Again"
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.className = "start";
+                    button.textContent = "Play Again";
+                }, 1000);
+            }
+
+            button.addEventListener('click', () => {
+                if (state === "idle") {
+                    // Start a new game
+                    resetForNewGame();
+                    startGame();
+                } else if (state === "waiting") {
+                    // Pressed too early
+                    endGameEarly();
+                } else if (state === "ready") {
+                    const endTime = performance.now();
+                    const reactionTime = endTime - startTime;
+                    trialCount++;
+
+                    // Check if this attempt is valid or suspicious
+                    if (reactionTime < suspiciousThreshold) {
+                        // Suspicious attempt
+                        hadSuspicious = true;
+                        appendAttemptResult(reactionTime, true);
+                        trialCount--;
+                        // Not counted towards valid attempts
+                        // Still need totalValidAttempts valid attempts
+                        startRound(); // continue with another round
+                    } else {
+                        // Valid attempt
+                        validCount++;
+                        reactionTimes.push(reactionTime);
+                        appendAttemptResult(reactionTime, false);
+
+                        if (validCount < totalValidAttempts) {
+                            startRound();
+                        } else {
+                            // Done, we got our 5 valid attempts
+                            finishGame();
+                        }
+                    }
+                } else if (state === "done") {
+                    // "Play Again"
+                    resetForNewGame();
+                    startGame();
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
