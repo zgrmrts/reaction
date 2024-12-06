@@ -30,12 +30,10 @@
 
         body.dark-mode a {
             color: #add8e6;
-            /* Lighter link color in dark mode */
         }
 
         body.light-mode a {
             color: #0000ee;
-            /* Default blue link in light mode */
         }
 
         body {
@@ -93,11 +91,9 @@
         #gameButton {
             display: block;
             margin: 0 auto 80px auto;
-            /* Space between button and scoreboard container */
         }
 
         .scoreboard-container-wrapper {
-            /* Enough width to show two scoreboards side-by-side */
             width: calc(var(--scoreboard-width)*2 + 20px);
             margin: 0 auto;
             overflow: hidden;
@@ -146,15 +142,6 @@
             font-size: 1.2em;
         }
 
-        .explanation {
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
-
-        .yellow-text {
-            color: #ffeb3b;
-        }
-
         .best-score-display {
             position: absolute;
             top: 20px;
@@ -198,6 +185,11 @@
             background-color: #fff;
             color: #000;
         }
+
+        /* Add extra space below the scoreboard for scrolling */
+        .extra-space {
+            height: 1000px; /* Adjust as needed */
+        }
     </style>
 </head>
 
@@ -212,18 +204,11 @@
         When you begin a game, a button instructs you not to press it until it turns green.
         After a random delay, the button turns green, and you should press it as quickly as possible.
         You need five valid attempts (≥100ms). Attempts under 100ms are considered accidental and not counted.
-        These extremely short times are very likely due to anticipating the change rather than reacting to it.
-        Learn more about reaction times and their lower bounds
+        These extremely short times are likely due to anticipating the change rather than reacting to it.
+        Learn more about reaction times
         <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses."
             target="_blank">here</a>.
         After completing five valid attempts, you'll get your average reaction time.
-    </p>
-    <p class="project-description">
-        <a href="https://github.com/zgrmrts/reaction" target="_blank">
-            <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub"
-                style="vertical-align: middle;">
-            View on GitHub
-        </a>
     </p>
     <button id="gameButton" class="start">Start</button>
 
@@ -232,6 +217,17 @@
             <!-- Scoreboards for each game will be dynamically added here -->
         </div>
     </div>
+
+    <!-- Extra space to allow scrolling before the game starts -->
+    <div class="extra-space"></div>
+
+    <p class="project-description">
+        <a href="https://github.com/zgrmrts/reaction" target="_blank">
+            <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub"
+                style="vertical-align: middle;">
+            View on GitHub
+        </a>
+    </p>
 
     <script>
         (function () {
@@ -281,7 +277,7 @@
                 button.className = "start";
                 button.textContent = "Start";
                 button.disabled = false;
-                button.style.backgroundColor = ""; // Reset any inline style
+                button.style.backgroundColor = "";
             }
 
             function createNewScoreboard() {
@@ -293,21 +289,23 @@
                 return scoreboard;
             }
 
+            function canShowTwoBoards() {
+                return scoreboardContainerWrapper.clientWidth >= getScoreboardWidth() * 2;
+            }
+
             function prepareScoreboardsForNewGame() {
-                const canShowTwoBoards = scoreboardContainerWrapper.clientWidth >= getScoreboardWidth() * 2;
                 const existing = scoreboardContainer.querySelectorAll('.scoreboard');
 
-                // If we cannot show two boards, clear existing ones
-                if (!canShowTwoBoards) {
+                if (!canShowTwoBoards()) {
                     scoreboardContainer.innerHTML = '';
                 }
 
-                if (existing.length >= 2 && canShowTwoBoards) {
-                    // Three or more: append new scoreboard, shift and remove old
-                    const newBoard = createNewScoreboard();
-                    scoreboardContainer.appendChild(newBoard);
-                    currentScoreboard = newBoard;
+                const newBoard = createNewScoreboard();
+                scoreboardContainer.appendChild(newBoard);
+                currentScoreboard = newBoard;
 
+                if (existing.length >= 2 && canShowTwoBoards()) {
+                    scoreboardContainer.style.transition = 'transform 0.5s ease';
                     scoreboardContainer.style.transform = 'translateX(-' + getScoreboardWidth() + 'px)';
 
                     scoreboardContainer.addEventListener('transitionend', function onTransEnd() {
@@ -318,14 +316,12 @@
                         }
                         scoreboardContainer.style.transition = 'none';
                         scoreboardContainer.style.transform = 'translateX(0)';
-                        scoreboardContainer.offsetHeight;
+                        scoreboardContainer.offsetHeight; 
                         scoreboardContainer.style.transition = 'transform 0.5s ease';
                     }, { once: true });
                 } else {
-                    // Less than 2 scoreboards or too narrow screen
-                    const newBoard = createNewScoreboard();
-                    scoreboardContainer.appendChild(newBoard);
-                    currentScoreboard = newBoard;
+                    scoreboardContainer.style.transition = 'none';
+                    scoreboardContainer.style.transform = 'translateX(0)';
                 }
             }
 
@@ -361,7 +357,7 @@
             }
 
             function getScoreboardWidth() {
-                return 320; // Matches var(--scoreboard-width)
+                return 320; 
             }
 
             function startRound() {
@@ -370,7 +366,7 @@
                 button.textContent = "Don't press me";
                 button.disabled = false;
 
-                const randomDelay = Math.floor(Math.random() * 2000) + 500; // 0.5-2.5 seconds
+                const randomDelay = Math.floor(Math.random() * 2000) + 500;
                 timerId = setTimeout(() => {
                     state = "ready";
                     startTime = performance.now();
@@ -394,9 +390,8 @@
                 state = "done";
                 button.disabled = true;
 
-                let avg;
                 const sum = reactionTimes.reduce((a, b) => a + b, 0);
-                avg = sum / reactionTimes.length;
+                const avg = sum / reactionTimes.length;
 
                 if (bestScore === null || avg < bestScore) {
                     bestScore = avg;
@@ -409,10 +404,8 @@
             }
 
             function prepareNextGame() {
-                // After finishing a game, first show "Game Over" in red for 2 seconds, then "Play Again" in green.
                 button.className = "game-over-state";
                 button.textContent = "Game Over";
-
                 setTimeout(() => {
                     button.disabled = false;
                     button.className = "start";
@@ -422,26 +415,20 @@
 
             button.addEventListener('click', () => {
                 if (state === "idle") {
-                    // Start a new game
                     resetForNewGame();
                     startGame();
                 } else if (state === "waiting") {
-                    // Pressed too early
                     endGameEarly();
                 } else if (state === "ready") {
                     const endTime = performance.now();
                     const reactionTime = endTime - startTime;
                     trialCount++;
 
-                    // Check if this attempt is valid or suspicious
                     if (reactionTime < suspiciousThreshold) {
-                        // Suspicious attempt
                         appendAttemptResult(reactionTime, true);
                         trialCount--;
-                        // Not counted towards valid attempts
-                        startRound(); // continue with another round
+                        startRound();
                     } else {
-                        // Valid attempt
                         validCount++;
                         reactionTimes.push(reactionTime);
                         appendAttemptResult(reactionTime, false);
@@ -449,12 +436,10 @@
                         if (validCount < totalValidAttempts) {
                             startRound();
                         } else {
-                            // Done, we got our 5 valid attempts
                             finishGame();
                         }
                     }
                 } else if (state === "done") {
-                    // "Play Again"
                     resetForNewGame();
                     startGame();
                 }
