@@ -219,13 +219,11 @@
         After completing five valid attempts, you'll get your average reaction time.
     </p>
     <p class="project-description">
-        <!-- GitHub link starts here -->
         <a href="https://github.com/zgrmrts/reaction" target="_blank">
             <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub"
                 style="vertical-align: middle;">
             View on GitHub
         </a>
-        <!-- GitHub link ends here -->
     </p>
     <button id="gameButton" class="start">Start</button>
 
@@ -296,8 +294,15 @@
             }
 
             function prepareScoreboardsForNewGame() {
+                const canShowTwoBoards = scoreboardContainerWrapper.clientWidth >= getScoreboardWidth() * 2;
                 const existing = scoreboardContainer.querySelectorAll('.scoreboard');
-                if (existing.length >= 2) {
+
+                // If we cannot show two boards, clear existing ones
+                if (!canShowTwoBoards) {
+                    scoreboardContainer.innerHTML = '';
+                }
+
+                if (existing.length >= 2 && canShowTwoBoards) {
                     // Three or more: append new scoreboard, shift and remove old
                     const newBoard = createNewScoreboard();
                     scoreboardContainer.appendChild(newBoard);
@@ -317,7 +322,7 @@
                         scoreboardContainer.style.transition = 'transform 0.5s ease';
                     }, { once: true });
                 } else {
-                    // Less than 2 scoreboards
+                    // Less than 2 scoreboards or too narrow screen
                     const newBoard = createNewScoreboard();
                     scoreboardContainer.appendChild(newBoard);
                     currentScoreboard = newBoard;
@@ -434,7 +439,6 @@
                         appendAttemptResult(reactionTime, true);
                         trialCount--;
                         // Not counted towards valid attempts
-                        // Still need totalValidAttempts valid attempts
                         startRound(); // continue with another round
                     } else {
                         // Valid attempt
