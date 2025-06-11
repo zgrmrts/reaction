@@ -251,7 +251,11 @@
             let suspiciousThreshold = 100;
             let totalValidAttempts = 5;
             let state = "idle";
-            let bestScore = localStorage.getItem('bestReactionScore') ? parseFloat(localStorage.getItem('bestReactionScore')) : null;
+            let storedBest = localStorage.getItem('bestReactionScore');
+            let bestScore = storedBest !== null ? parseFloat(storedBest) : null;
+            if (isNaN(bestScore)) {
+                bestScore = null;
+            }
             let startTime = 0;
             let timerId = null;
 
