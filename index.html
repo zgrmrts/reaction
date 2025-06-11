@@ -334,7 +334,8 @@
             bestScoreDisplay.addEventListener('click', function(){
                 // If there's a best score, toggle the clear button container
                 if (bestScore !== null) {
-                    clearBestContainer.style.display = clearBestContainer.style.display === "none" ? "block" : "none";
+                    const hidden = !clearBestContainer.style.display || clearBestContainer.style.display === "none";
+                    clearBestContainer.style.display = hidden ? "block" : "none";
                 }
             });
 
