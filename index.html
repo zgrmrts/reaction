@@ -232,7 +232,7 @@
         <a href="https://github.com/zgrmrts/reaction" target="_blank">
             <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub"
                 style="vertical-align: middle;">
-            View on GitHub
+            <span id="githubText">View on GitHub</span>
         </a>
     </p>
 
@@ -244,6 +244,67 @@
             const themeToggle = document.getElementById('themeToggle');
             const clearBestContainer = document.getElementById('clearBestContainer');
             const clearBestButton = document.getElementById('clearBestScore');
+
+            const translations = {
+                en: {
+                    pageTitle: 'Reaction Game',
+                    themeToggle: 'Light/Dark',
+                    clearBestScore: 'Clear Best Score',
+                    gameTitle: 'Reaction Game',
+                    description: 'This is a simple reaction game designed to measure human response times. When you begin a game, a button instructs you not to press it until it turns green. After a random delay, the button turns green, and you should press it as quickly as possible. You need five valid attempts (≥100ms). Attempts under 100ms are considered accidental and not counted. These extremely short times are likely due to anticipating the change rather than reacting to it. Learn more about reaction times <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses." target="_blank">here</a>. After completing five valid attempts, you\'ll get your average reaction time.',
+                    start: 'Start',
+                    resultsHeader: 'Results',
+                    viewGitHub: 'View on GitHub',
+                    bestScore: 'Best Score',
+                    invalid: 'Invalid',
+                    attempt: 'Attempt',
+                    pressedTooEarly: 'Pressed too early! Game Over.',
+                    averageScore: 'Average Score',
+                    newBest: ' (New Best!)',
+                    dontPress: "Don't press me",
+                    pressMe: 'Press me',
+                    gameOverExclaim: 'Game Over!',
+                    gameOver: 'Game Over',
+                    playAgain: 'Play Again'
+                },
+                tr: {
+                    pageTitle: 'Tepki Oyunu',
+                    themeToggle: 'Açık/Koyu',
+                    clearBestScore: 'En İyi Skoru Temizle',
+                    gameTitle: 'Tepki Oyunu',
+                    description: 'Bu basit reaksiyon oyunu insan tepki sürenizi ölçmek için tasarlanmıştır. Oyuna başladığınızda düğmeye yeşil olana kadar basmamanız söylenir. Rastgele bir gecikmenin ardından düğme yeşil olur ve mümkün olduğunca çabuk basmanız gerekir. Geçerli sayılabilmesi için beş denemeye ihtiyacınız vardır (≥100ms). 100ms altındaki denemeler kazara kabul edilir ve sayılmaz. Bu kadar kısa süreler muhtemelen değişikliği önceden tahmin etmekten kaynaklanır. Tepki süreleri hakkında daha fazla bilgiye <a href="https://en.wikipedia.org/wiki/Mental_chronometry#:~:text=Many%20researchers%20consider%20the%20lower,perception%20and%20for%20motor%20responses." target="_blank">buradan</a> ulaşabilirsiniz. Beş geçerli denemeyi tamamladıktan sonra ortalama tepki süreniz gösterilir.',
+                    start: 'Başla',
+                    resultsHeader: 'Sonuçlar',
+                    viewGitHub: 'GitHub\'da Görüntüle',
+                    bestScore: 'En İyi Skor',
+                    invalid: 'Geçersiz',
+                    attempt: 'Deneme',
+                    pressedTooEarly: 'Çok erken bastınız! Oyun Bitti.',
+                    averageScore: 'Ortalama Skor',
+                    newBest: ' (Yeni En İyi!)',
+                    dontPress: 'Bana basma',
+                    pressMe: 'Bana bas',
+                    gameOverExclaim: 'Oyun Bitti!',
+                    gameOver: 'Oyun Bitti',
+                    playAgain: 'Tekrar Oyna'
+                }
+            };
+
+            const isTr = navigator.language && navigator.language.toLowerCase().startsWith('tr');
+            const t = translations[isTr ? 'tr' : 'en'];
+
+            document.documentElement.lang = isTr ? 'tr' : 'en';
+            document.title = t.pageTitle;
+            themeToggle.textContent = t.themeToggle;
+            clearBestButton.textContent = t.clearBestScore;
+            document.querySelector('h1').textContent = t.gameTitle;
+            const descParas = document.querySelectorAll('p.project-description');
+            if (descParas.length > 0) {
+                descParas[0].innerHTML = t.description;
+            }
+            document.getElementById('githubText').textContent = t.viewGitHub;
+            button.textContent = t.start;
+            scoreboardContainer.querySelector('h2').textContent = t.resultsHeader;
 
             let reactionTimes = [];
             let trialCount = 0;
@@ -258,7 +319,7 @@
             function updateBestScoreDisplay() {
                 if (bestScore !== null) {
                     bestScoreDisplay.style.display = "block";
-                    bestScoreDisplay.textContent = `Best Score: ${bestScore.toFixed(2)} ms`;
+                    bestScoreDisplay.textContent = `${t.bestScore}: ${bestScore.toFixed(2)} ms`;
                 } else {
                     bestScoreDisplay.style.display = "none";
                     clearBestContainer.style.display = "none";
@@ -297,10 +358,10 @@
                 validCount = 0;
                 state = "idle";
                 button.className = "start";
-                button.textContent = "Start";
+                button.textContent = t.start;
                 button.disabled = false;
                 button.style.backgroundColor = "";
-                scoreboardContainer.innerHTML = '<h2>Results</h2>';
+                scoreboardContainer.innerHTML = `<h2>${t.resultsHeader}</h2>`;
             }
 
             function startGame() {
@@ -313,9 +374,9 @@
                 line.className = 'attempt-result';
                 if (accidental) {
                     line.classList.add('accidental-attempt');
-                    line.textContent = `Invalid: ${time.toFixed(2)} ms`;
+                    line.textContent = `${t.invalid}: ${time.toFixed(2)} ms`;
                 } else {
-                    line.textContent = `Attempt ${trialCount}: ${time.toFixed(2)} ms`;
+                    line.textContent = `${t.attempt} ${trialCount}: ${time.toFixed(2)} ms`;
                 }
                 scoreboardContainer.appendChild(line);
             }
@@ -323,19 +384,19 @@
             function appendGameOverEarly() {
                 const line = document.createElement('div');
                 line.className = 'attempt-result game-over';
-                line.textContent = 'Pressed too early! Game Over.';
+                line.textContent = t.pressedTooEarly;
                 scoreboardContainer.appendChild(line);
             }
 
             function appendFinalResults(avg, newBest) {
                 const finalScoreElem = document.createElement('div');
                 finalScoreElem.className = 'final-score';
-                finalScoreElem.textContent = `Average Score: ${avg.toFixed(2)} ms`;
+                finalScoreElem.textContent = `${t.averageScore}: ${avg.toFixed(2)} ms`;
 
                 if (newBest) {
                     const bestNotice = document.createElement('span');
                     bestNotice.className = 'new-best';
-                    bestNotice.textContent = ' (New Best!)';
+                    bestNotice.textContent = t.newBest;
                     finalScoreElem.appendChild(bestNotice);
                 }
 
@@ -345,7 +406,7 @@
             function startRound() {
                 state = "waiting";
                 button.className = "waiting";
-                button.textContent = "Don't press me";
+                button.textContent = t.dontPress;
                 button.disabled = false;
 
                 const randomDelay = Math.floor(Math.random() * 2000) + 500;
@@ -353,7 +414,7 @@
                     state = "ready";
                     startTime = performance.now();
                     button.className = "ready";
-                    button.textContent = "Press me";
+                    button.textContent = t.pressMe;
                 }, randomDelay);
             }
 
@@ -361,7 +422,7 @@
                 clearTimeout(timerId);
                 state = "done";
                 button.className = "start";
-                button.textContent = "Game Over!";
+                button.textContent = t.gameOverExclaim;
                 button.disabled = true;
 
                 appendGameOverEarly();
@@ -390,11 +451,11 @@
 
             function prepareNextGame() {
                 button.className = "game-over-state";
-                button.textContent = "Game Over";
+                button.textContent = t.gameOver;
                 setTimeout(() => {
                     button.disabled = false;
                     button.className = "start";
-                    button.textContent = "Play Again";
+                    button.textContent = t.playAgain;
                 }, 1000);
             }
 
